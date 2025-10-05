@@ -1,0 +1,6 @@
+@ViviGest.Api_HostAddress = http://localhost:7049
+
+GET {{ViviGest.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
