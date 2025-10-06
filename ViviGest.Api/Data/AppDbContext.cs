@@ -12,6 +12,14 @@ public class AppDbContext : DbContext
     public DbSet<Rol> Roles => Set<Rol>();
     public DbSet<UsuarioRol> UsuarioRoles => Set<UsuarioRol>();
 
+    // NUEVOS DbSets para correspondencia
+    public DbSet<Correspondencia> Correspondencias => Set<Correspondencia>();
+    public DbSet<TipoCorrespondencia> TiposCorrespondencia => Set<TipoCorrespondencia>();
+    public DbSet<EstadoCorrespondencia> EstadosCorrespondencia => Set<EstadoCorrespondencia>();
+    public DbSet<Unidad> Unidades => Set<Unidad>();
+    public DbSet<Torre> Torres => Set<Torre>();
+    public DbSet<Conjunto> Conjuntos => Set<Conjunto>();
+
     protected override void OnModelCreating(ModelBuilder mb)
     {
         // Persona
@@ -21,7 +29,7 @@ public class AppDbContext : DbContext
             e.HasKey(x => x.IdPersona);
             e.Property(x => x.IdPersona).HasColumnName("IdPersona");
             e.Property(x => x.CorreoElectronico).HasMaxLength(120);
-            e.HasIndex(x => x.CorreoElectronico).IsUnique(); // según DDL
+            e.HasIndex(x => x.CorreoElectronico).IsUnique();
         });
 
         // Usuario
@@ -55,6 +63,82 @@ public class AppDbContext : DbContext
             e.HasOne(x => x.Rol)
              .WithMany(r => r.UsuarioRoles)
              .HasForeignKey(x => x.IdRol);
+        });
+
+        // NUEVAS configuraciones para correspondencia
+        // Correspondencia
+        mb.Entity<Correspondencia>(e =>
+        {
+            e.ToTable("Correspondencia");
+            e.HasKey(x => x.IdCorrespondencia);
+            e.Property(x => x.Remitente).HasMaxLength(120);
+            e.Property(x => x.Observacion).HasMaxLength(250);
+            e.Property(x => x.EntregadoA).HasMaxLength(120);
+
+            e.HasOne(x => x.Unidad)
+             .WithMany()
+             .HasForeignKey(x => x.IdUnidad);
+
+            e.HasOne(x => x.TipoCorrespondencia)
+             .WithMany()
+             .HasForeignKey(x => x.IdTipoCorrespondencia);
+
+            e.HasOne(x => x.EstadoCorrespondencia)
+             .WithMany()
+             .HasForeignKey(x => x.IdEstadoCorrespondencia);
+
+            e.HasOne(x => x.UsuarioRegistro)
+             .WithMany()
+             .HasForeignKey(x => x.IdUsuarioRegistro);
+        });
+
+        // TipoCorrespondencia (catálogo)
+        mb.Entity<TipoCorrespondencia>(e =>
+        {
+            e.ToTable("TipoCorrespondencia");
+            e.HasKey(x => x.IdTipoCorrespondencia);
+            e.Property(x => x.Nombre).HasMaxLength(30);
+        });
+
+        // EstadoCorrespondencia (catálogo)
+        mb.Entity<EstadoCorrespondencia>(e =>
+        {
+            e.ToTable("EstadoCorrespondencia");
+            e.HasKey(x => x.IdEstadoCorrespondencia);
+            e.Property(x => x.Nombre).HasMaxLength(30);
+        });
+
+        // Unidad
+        mb.Entity<Unidad>(e =>
+        {
+            e.ToTable("Unidad");
+            e.HasKey(x => x.IdUnidad);
+            e.Property(x => x.Codigo).HasMaxLength(20);
+            e.Property(x => x.AreaM2).HasColumnType("decimal(8,2)");
+
+            e.HasOne(x => x.Torre)
+             .WithMany()
+             .HasForeignKey(x => x.IdTorre);
+        });
+
+        // Torre
+        mb.Entity<Torre>(e =>
+        {
+            e.ToTable("Torre");
+            e.HasKey(x => x.IdTorre);
+            e.Property(x => x.Nombre).HasMaxLength(50);
+
+            e.HasOne(x => x.Conjunto)
+             .WithMany()
+             .HasForeignKey(x => x.IdConjunto);
+        });
+
+        // Conjunto
+        mb.Entity<Conjunto>(e =>
+        {
+            e.ToTable("Conjunto");
+            e.HasKey(x => x.IdConjunto);
+            e.Property(x => x.Nombre).HasMaxLength(120);
         });
     }
 }
