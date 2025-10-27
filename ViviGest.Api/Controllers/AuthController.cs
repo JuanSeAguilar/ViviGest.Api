@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,7 +25,7 @@ public class AuthController : ControllerBase
         _pwd = pwd;
         _cfg = cfg;
     }
-
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest req)
     {
@@ -59,11 +60,21 @@ public class AuthController : ControllerBase
 
     private string GenerateJwt(Persona persona, IEnumerable<string> roles)
     {
+        var u = persona.Usuario!; // ya validaste que existe
+
         var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, persona.CorreoElectronico ?? persona.IdPersona.ToString()),
-            new Claim("pid", persona.IdPersona.ToString())
-        };
+    {
+        // 👇 El controlador leerá cualquiera de estos como IdUsuario (GUID)
+        new Claim(JwtRegisteredClaimNames.Sub, u.IdUsuario.ToString()),            // subject = IdUsuario
+        new Claim(ClaimTypes.NameIdentifier, u.IdUsuario.ToString()),              // nameid
+        new Claim("userId", u.IdUsuario.ToString()),                               // alias
+        new Claim("uid", u.IdUsuario.ToString()),                                  // alias
+
+        // Info adicional útil
+        new Claim(ClaimTypes.Email, persona.CorreoElectronico ?? string.Empty),
+        new Claim("pid", persona.IdPersona.ToString())                             // IdPersona (por si acaso)
+    };
+
         claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_cfg["Jwt:Key"]!));
@@ -79,6 +90,7 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
 
 }
 
