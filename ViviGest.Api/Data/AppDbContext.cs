@@ -136,8 +136,9 @@ public class AppDbContext : DbContext
             e.Property(x => x.AreaM2).HasColumnType("decimal(8,2)");
 
             e.HasOne(x => x.Torre)
-             .WithMany()
-             .HasForeignKey(x => x.IdTorre);
+             .WithMany(t => t.Unidades)
+             .HasForeignKey(x => x.IdTorre)
+             .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Conjunto

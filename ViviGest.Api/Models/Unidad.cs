@@ -18,6 +18,7 @@ namespace ViviGest.Api.Models
         public DateTime FechaCreacion { get; set; }
 
         // Navs correctas según tu DDL:
+        [ForeignKey("IdTorre")]
         public Torre Torre { get; set; } = null!;
         public ICollection<Residencia>? Residencias { get; set; }   // <— en lugar de "Residente"
         public ICollection<Visita>? Visitas { get; set; }
