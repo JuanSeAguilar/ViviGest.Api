@@ -10,5 +10,6 @@
 
         public Persona Persona { get; set; } = null!;
         public ICollection<UsuarioRol> UsuarioRoles { get; set; } = new List<UsuarioRol>();
+
     }
 }
