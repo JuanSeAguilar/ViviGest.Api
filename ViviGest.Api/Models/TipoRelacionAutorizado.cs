@@ -1,21 +1,13 @@
-﻿namespace ViviGest.Api.Models
-{
-    public class TipoCorrespondencia
-    {
-        public int IdTipoCorrespondencia { get; set; }
-        public string Nombre { get; set; }
-    }
-}
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ViviGest.Api.Models
 {
-    [Table("TipoCorrespondencia")]
-    public class TipoCorrespondencia
+    [Table("TipoRelacionAutorizado")]
+    public class TipoRelacionAutorizado
     {
         [Key]
-        public int IdTipoCorrespondencia { get; set; }
+        public int IdTipoRelacionAutorizado { get; set; }
 
         [Required, MaxLength(80)]
         public string Nombre { get; set; } = string.Empty;
