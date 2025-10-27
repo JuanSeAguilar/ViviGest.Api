@@ -49,9 +49,9 @@ namespace ViviGest.Api.Controllers.Guarda
                 return NotFound();
 
             correspondencia.IdEstadoCorrespondencia = 2; // 2 = Entregado
-            correspondencia.FechaEntrega = DateTime.Now;
+            correspondencia.FechaEntregado = DateTime.Now;
 
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); 
             return Ok(new { message = "Correspondencia entregada" });
         }
     }

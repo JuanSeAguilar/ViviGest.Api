@@ -1,11 +1,4 @@
-﻿namespace ViviGest.Api.Models
-{
-    public class EstadoCorrespondencia
-    {
-        public int IdEstadoCorrespondencia { get; set; }
-        public string Nombre { get; set; }
-    }
-}
+﻿
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

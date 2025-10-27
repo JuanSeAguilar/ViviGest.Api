@@ -20,24 +20,20 @@ public class AppDbContext : DbContext
     public DbSet<Unidad> Unidades => Set<Unidad>();
     public DbSet<Torre> Torres => Set<Torre>();
     public DbSet<Conjunto> Conjuntos => Set<Conjunto>();
-    // Inmobiliario
-    public DbSet<Conjunto> Conjuntos => Set<Conjunto>();
-    public DbSet<Torre> Torres => Set<Torre>();
-    public DbSet<Unidad> Unidades => Set<Unidad>();
     public DbSet<Residencia> Residencias => Set<Residencia>();
 
     // Operación de portería
     public DbSet<Visitante> Visitantes => Set<Visitante>();
     public DbSet<Visita> Visitas => Set<Visita>();
     public DbSet<PersonaAutorizada> PersonasAutorizadas => Set<PersonaAutorizada>();
-    public DbSet<Correspondencia> Correspondencias => Set<Correspondencia>();
+
 
     // Catálogos (déjalos solo si SON tablas en tu modelo, no enums)
     // public DbSet<TipoDocumento> TiposDocumento => Set<TipoDocumento>();
     // public DbSet<TipoCorrespondencia> TiposCorrespondencia => Set<TipoCorrespondencia>();
     // public DbSet<EstadoCorrespondencia> EstadosCorrespondencia => Set<EstadoCorrespondencia>();
     // public DbSet<TipoRelacionAutorizado> TiposRelacionAutorizado => Set<TipoRelacionAutorizado>();
-
+    
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
@@ -144,18 +140,6 @@ public class AppDbContext : DbContext
              .HasForeignKey(x => x.IdTorre);
         });
 
-        // Torre
-        mb.Entity<Torre>(e =>
-        {
-            e.ToTable("Torre");
-            e.HasKey(x => x.IdTorre);
-            e.Property(x => x.Nombre).HasMaxLength(50);
-
-            e.HasOne(x => x.Conjunto)
-             .WithMany()
-             .HasForeignKey(x => x.IdConjunto);
-        });
-
         // Conjunto
         mb.Entity<Conjunto>(e =>
         {
@@ -163,13 +147,7 @@ public class AppDbContext : DbContext
             e.HasKey(x => x.IdConjunto);
             e.Property(x => x.Nombre).HasMaxLength(120);
         });
-        // ===== Conjunto
-        mb.Entity<Conjunto>(e =>
-        {
-            e.ToTable("Conjunto");
-            e.HasKey(x => x.IdConjunto);
-        });
-
+     
         // ===== Torre
         mb.Entity<Torre>(e =>
         {
@@ -182,16 +160,7 @@ public class AppDbContext : DbContext
         });
 
         // ===== Unidad  (¡clave primaria explícita!)
-        mb.Entity<Unidad>(e =>
-        {
-            e.ToTable("Unidad");
-            e.HasKey(x => x.IdUnidad); // <- evita el error "requires a primary key"
-            e.Property(x => x.Codigo).HasMaxLength(20).IsRequired();
-            e.HasOne(x => x.Torre)
-             .WithMany(t => t.Unidades)
-             .HasForeignKey(x => x.IdTorre);
-            e.HasIndex(x => new { x.IdTorre, x.Codigo }).IsUnique(); // UQ_Unidad
-        });
+        
 
         // ===== Residencia (histórico Usuario-Unidad)
         mb.Entity<Residencia>(e =>
