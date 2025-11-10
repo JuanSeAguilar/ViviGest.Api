@@ -70,6 +70,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
