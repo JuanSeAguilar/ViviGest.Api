@@ -11,6 +11,6 @@ public class DemoController : ControllerBase
     public IActionResult Publico() => Ok(new { mensaje = "Acceso libre" });
 
     [Authorize]
-    [HttpGet("privado")]
+    [HttpGet("privado")] 
     public IActionResult Privado() => Ok(new { mensaje = "Acceso con token válido" });
 }

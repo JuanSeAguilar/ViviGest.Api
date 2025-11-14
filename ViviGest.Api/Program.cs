@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+ï»¿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -17,7 +17,7 @@ builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddCors(opt =>
 {
     opt.AddPolicy("FrontPolicy", p => p
-        .WithOrigins("http://localhost:5173", "http://localhost:3000")
+        .WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:5171", "http://localhost:5170")
         .AllowAnyHeader()
         .AllowAnyMethod());
 });
@@ -52,7 +52,7 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Introduce el token JWT así: Bearer {tu token}"
+        Description = "Introduce el token JWT asÃ­: Bearer {tu token}"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -70,6 +70,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
@@ -85,63 +86,5 @@ app.UseSwaggerUI(c =>
 
 app.MapControllers();
 
-// ---- Seed mínimo: crea Persona+Usuario admin si no existe (por correo) ----
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.EnsureCreatedAsync();
-
-    var correoAdmin = "admin@demo.com";
-    var persona = await db.Personas.Include(p => p.Usuario)
-                    .FirstOrDefaultAsync(p => p.CorreoElectronico == correoAdmin);
-
-    if (persona == null)
-    {
-        persona = new  ViviGest.Api.Models.Persona
-        {
-            IdPersona = Guid.NewGuid(),
-            IdTipoDocumento = 1, // CC (existe en catálogo del DDL)
-            NumeroDocumento = "9999999999",
-            Nombres = "Admin",
-            Apellidos = "Demo",
-            CorreoElectronico = correoAdmin
-        };
-        db.Personas.Add(persona);
-        await db.SaveChangesAsync();
-    }
-
-    if (persona.Usuario == null)
-    {
-        var pwdSvc = scope.ServiceProvider.GetRequiredService<IPasswordService>();
-        pwdSvc.CreatePasswordHash("123456", out var hash, out var salt);
-
-        var usuario = new ViviGest.Api.Models.Usuario
-        {
-            IdUsuario = Guid.NewGuid(),
-            IdPersona = persona.IdPersona,
-            ContrasenaHash = hash,
-            ContrasenaSalt = salt,
-            Activo = true
-        };
-        db.Usuarios.Add(usuario);
-        await db.SaveChangesAsync();
-
-        // Asegura rol Administrador
-        var rolAdmin = await db.Roles.FirstOrDefaultAsync(r => r.Nombre == "Administrador");
-        if (rolAdmin == null)
-        {
-            // En tu DDL el seed crea 'Administrador' en Rol; por si acaso lo insertamos si no estuviera.
-            rolAdmin = new ViviGest.Api.Models.Rol { Nombre = "Administrador" };
-            db.Roles.Add(rolAdmin);
-            await db.SaveChangesAsync();
-        }
-        db.UsuarioRoles.Add(new ViviGest.Api.Models.UsuarioRol
-        {
-            IdUsuario = usuario.IdUsuario,
-            IdRol = rolAdmin.IdRol
-        });
-        await db.SaveChangesAsync();
-    }
-}
-
+ 
 app.Run();

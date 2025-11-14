@@ -6,4 +6,4 @@
         public string Username { get; set; } = string.Empty;
         public IEnumerable<string> Roles { get; set; } = Enumerable.Empty<string>();
     }
-}
+} 
