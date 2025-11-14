@@ -6,7 +6,7 @@ namespace ViviGest.Api.Models
 {
     [Table("PersonaAutorizada")]
     public class PersonaAutorizada
-    {
+    { 
         [Key]
         public Guid IdPersonaAutorizada { get; set; }
 

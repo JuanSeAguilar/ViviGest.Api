@@ -13,7 +13,7 @@ namespace ViviGest.Api.Controllers.Guarda
 
         public AutorizadoController(AppDbContext context)
         {
-            _context = context;
+            _context = context; 
         }
 
         [HttpGet]

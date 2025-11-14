@@ -11,7 +11,7 @@ namespace ViviGest.Api.Models
 
         public Guid IdVisitante { get; set; }
         public Guid IdUnidad { get; set; }
-
+         
         public string? NotaDestino { get; set; }
         public string? PlacaVehiculo { get; set; }
 

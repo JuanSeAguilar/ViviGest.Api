@@ -10,7 +10,7 @@ namespace ViviGest.Api.Models
         public int IdTipoDocumento { get; set; }
 
         [Required, MaxLength(50)]
-        public string Nombre { get; set; } = string.Empty;
+        public string Nombre { get; set; } = string.Empty; 
 
         [MaxLength(10)]
         public string? Abreviatura { get; set; }

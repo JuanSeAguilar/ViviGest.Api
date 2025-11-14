@@ -11,7 +11,7 @@ namespace ViviGest.Api.Controllers
     public class CatalogoController : ControllerBase
     {
         private readonly AppDbContext _db;
-        public CatalogoController(AppDbContext db) => _db = db;
+        public CatalogoController(AppDbContext db) => _db = db; 
 
         [HttpGet("torres")]
         public async Task<IActionResult> GetTorres()

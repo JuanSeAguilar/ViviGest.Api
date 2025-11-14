@@ -12,7 +12,7 @@ namespace ViviGest.Api.Services
         // parámetros seguros para PBKDF2
         private const int SaltSize = 32;      // 256 bits
         private const int HashSize = 64;      // 512 bits
-        private const int Iterations = 100000;
+        private const int Iterations = 100000; 
 
         public void CreatePasswordHash(string password, out byte[] hash, out byte[] salt)
         {

@@ -12,7 +12,7 @@ namespace ViviGest.Api.Models
 
         [Required, MaxLength(80)]
         public string Nombre { get; set; } = string.Empty;
-
+         
         [MaxLength(250)]
         public string? Descripcion { get; set; }
     }

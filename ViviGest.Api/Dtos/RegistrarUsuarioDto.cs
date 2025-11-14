@@ -12,3 +12,4 @@
         public int IdRol { get; set; } // 1=Admin, 3=Guarda
     }
 }
+ 

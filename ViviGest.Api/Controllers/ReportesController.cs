@@ -9,7 +9,7 @@ using iText.Layout.Properties;
 using iText.Kernel.Pdf.Canvas.Draw;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ViviGest.Data;
+using ViviGest.Data; 
 using ViviGest.Api.Models;
 
 namespace ViviGest.Api.Controllers

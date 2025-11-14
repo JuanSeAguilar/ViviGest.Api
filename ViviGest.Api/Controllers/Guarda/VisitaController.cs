@@ -14,7 +14,7 @@ namespace ViviGest.Api.Controllers.Guarda
     {
         private readonly AppDbContext _context;
 
-        public VisitaController(AppDbContext context)
+        public VisitaController(AppDbContext context) 
         {
             _context = context;
         }

@@ -8,7 +8,7 @@ namespace ViviGest.Api.Models
     public class Torre
     {
         [Key]
-        public Guid IdTorre { get; set; }
+        public Guid IdTorre { get; set; } 
 
         public Guid IdConjunto { get; set; }
         public string Nombre { get; set; } = null!;

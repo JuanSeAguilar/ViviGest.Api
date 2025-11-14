@@ -7,7 +7,7 @@ namespace ViviGest.Api.Models
     [Table("Conjunto")]
     public class Conjunto
     {
-        [Key]
+        [Key] 
         public Guid IdConjunto { get; set; }
 
         public string Nombre { get; set; } = null!;

@@ -14,6 +14,6 @@ namespace ViviGest.Api.Models
         public Guid IdPersona { get; set; }
 
         // Navegación requerida por tu AppDbContext y controladores
-        public Persona Persona { get; set; } = null!;
+        public Persona Persona { get; set; } = null!; 
     }
 }

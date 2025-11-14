@@ -10,7 +10,7 @@ namespace ViviGest.Api.Models
         [Key]
         public Guid IdResidencia { get; set; }
 
-        public Guid IdUsuario { get; set; }
+        public Guid IdUsuario { get; set; } 
         public Guid IdUnidad { get; set; }
         public DateTime FechaInicio { get; set; }
         public DateTime? FechaFin { get; set; }

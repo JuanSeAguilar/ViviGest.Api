@@ -8,7 +8,7 @@
         public byte[] ContrasenaSalt { get; set; } = Array.Empty<byte>();
         public bool Activo { get; set; } = true;
 
-        public Persona Persona { get; set; } = null!;
+        public Persona Persona { get; set; } = null!; 
         public ICollection<UsuarioRol> UsuarioRoles { get; set; } = new List<UsuarioRol>();
 
     }

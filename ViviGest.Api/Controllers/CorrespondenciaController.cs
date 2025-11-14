@@ -13,7 +13,7 @@ namespace ViviGest.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    //[Authorize] 
     public class CorrespondenciaController : ControllerBase
     {
         private readonly AppDbContext _context;

@@ -14,7 +14,7 @@ namespace ViviGest.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
-{
+{ 
     private readonly AppDbContext _db;
     private readonly IPasswordService _pwd;
     private readonly IConfiguration _cfg;

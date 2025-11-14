@@ -7,7 +7,7 @@ namespace ViviGest.Api.Models
     {
         public Guid IdCorrespondencia { get; set; }
         public Guid IdUnidad { get; set; }
-        public int IdTipoCorrespondencia { get; set; }
+        public int IdTipoCorrespondencia { get; set; } 
         public string Remitente { get; set; }
         public DateTime FechaRecepcion { get; set; }
         public int IdEstadoCorrespondencia { get; set; }

@@ -218,24 +218,6 @@ public class AppDbContext : DbContext
             // e.HasOne(x => x.TipoRelacionNav).WithMany().HasForeignKey(x => x.IdTipoRelacionAutorizado);
             e.HasIndex(x => new { x.IdUsuarioResidente, x.IdPersona }).IsUnique();
         });
-
-        // ===== Correspondencia
-        mb.Entity<Correspondencia>(e =>
-        {
-            e.ToTable("Correspondencia");
-            e.HasKey(x => x.IdCorrespondencia);
-            e.HasOne(x => x.Unidad)
-             .WithMany(u => u.Correspondencias)
-             .HasForeignKey(x => x.IdUnidad);
-            // Si usas catálogos como tablas:
-            // e.HasOne(x => x.TipoCorrespondenciaNav).WithMany().HasForeignKey(x => x.IdTipoCorrespondencia);
-            // e.HasOne(x => x.EstadoCorrespondenciaNav).WithMany().HasForeignKey(x => x.IdEstadoCorrespondencia);
-            e.HasOne(x => x.UsuarioRegistro)
-             .WithMany()
-             .HasForeignKey(x => x.IdUsuarioRegistro);
-            e.HasIndex(x => new { x.IdUnidad, x.FechaRecepcion });
-        });
-
         // === Catálogos como tablas (solo si NO son enums en C#) ===
         // mb.Entity<TipoDocumento>().ToTable("TipoDocumento").HasKey(x => x.IdTipoDocumento);
         // mb.Entity<TipoCorrespondencia>().ToTable("TipoCorrespondencia").HasKey(x => x.IdTipoCorrespondencia);

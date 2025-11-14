@@ -10,7 +10,7 @@ public class RegistroController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly IPasswordService _passwordService;
-    private readonly IEmailService _emailService;
+    private readonly IEmailService _emailService; 
 
     public RegistroController(AppDbContext context, IPasswordService passwordService, IEmailService emailService)
     {
