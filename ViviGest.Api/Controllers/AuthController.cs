@@ -65,6 +65,7 @@ public class AuthController : ControllerBase
         var claims = new List<Claim>
     {
         // 👇 El controlador leerá cualquiera de estos como IdUsuario (GUID)
+        new Claim("id", u.IdUsuario.ToString()),
         new Claim(JwtRegisteredClaimNames.Sub, u.IdUsuario.ToString()),            // subject = IdUsuario
         new Claim(ClaimTypes.NameIdentifier, u.IdUsuario.ToString()),              // nameid
         new Claim("userId", u.IdUsuario.ToString()),                               // alias

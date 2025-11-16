@@ -26,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<Visitante> Visitantes => Set<Visitante>();
     public DbSet<Visita> Visitas => Set<Visita>();
     public DbSet<PersonaAutorizada> PersonasAutorizadas => Set<PersonaAutorizada>();
+    public DbSet<TipoRelacionAutorizado> TiposRelacionAutorizado => Set<TipoRelacionAutorizado>();
 
 
     // Catálogos (déjalos solo si SON tablas en tu modelo, no enums)
@@ -33,7 +34,7 @@ public class AppDbContext : DbContext
     // public DbSet<TipoCorrespondencia> TiposCorrespondencia => Set<TipoCorrespondencia>();
     // public DbSet<EstadoCorrespondencia> EstadosCorrespondencia => Set<EstadoCorrespondencia>();
     // public DbSet<TipoRelacionAutorizado> TiposRelacionAutorizado => Set<TipoRelacionAutorizado>();
-    
+
     protected override void OnModelCreating(ModelBuilder mb)
     {
         base.OnModelCreating(mb);
@@ -50,6 +51,9 @@ public class AppDbContext : DbContext
             // Si usas catálogo como tabla:
             // e.HasOne(x => x.TipoDocumentoNav).WithMany().HasForeignKey(x => x.IdTipoDocumento);
         });
+
+        mb.Entity<TipoRelacionAutorizado>().ToTable("TipoRelacionAutorizado");
+
 
         // ===== Usuario
         mb.Entity<Usuario>(e =>
@@ -203,6 +207,7 @@ public class AppDbContext : DbContext
             e.HasIndex(x => new { x.IdUnidad, x.FechaRegistro });
         });
 
+
         // ===== PersonaAutorizada
         mb.Entity<PersonaAutorizada>(e =>
         {
@@ -224,4 +229,5 @@ public class AppDbContext : DbContext
         // mb.Entity<EstadoCorrespondencia>().ToTable("EstadoCorrespondencia").HasKey(x => x.IdEstadoCorrespondencia);
         // mb.Entity<TipoRelacionAutorizado>().ToTable("TipoRelacionAutorizado").HasKey(x => x.IdTipoRelacionAutorizado);
     }
+
 }
