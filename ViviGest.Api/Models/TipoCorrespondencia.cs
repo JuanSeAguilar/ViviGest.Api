@@ -10,10 +10,8 @@ namespace ViviGest.Api.Models
         [Key]
         public int IdTipoCorrespondencia { get; set; }
 
-        [Required, MaxLength(80)]
-        public string Nombre { get; set; } = string.Empty;
-         
-        [MaxLength(250)]
-        public string? Descripcion { get; set; }
+        // 👈 esta propiedad DEBE llamarse igual que la columna,
+        //     o estar marcada con [Column("Nombre")]
+        public string Nombre { get; set; } = null!;
     }
 }

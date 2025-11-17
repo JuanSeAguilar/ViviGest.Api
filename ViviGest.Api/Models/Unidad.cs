@@ -1,5 +1,6 @@
 ﻿using System;
-﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ViviGest.Api.Models
@@ -12,16 +13,15 @@ namespace ViviGest.Api.Models
 
         public Guid IdTorre { get; set; }
         public string Codigo { get; set; } = null!;
-        public int? Piso { get; set; }
-        public decimal? AreaM2 { get; set; } 
-        public bool Activo { get; set; } = true;
-        public DateTime FechaCreacion { get; set; }
+        public decimal AreaM2 { get; set; }
 
-        // Navs correctas según tu DDL:
-        [ForeignKey("IdTorre")]
+        [ForeignKey(nameof(IdTorre))]
         public Torre Torre { get; set; } = null!;
-        public ICollection<Residencia>? Residencias { get; set; }   // <— en lugar de "Residente"
-        public ICollection<Visita>? Visitas { get; set; }
-        public ICollection<Correspondencia>? Correspondencias { get; set; }
+
+        public ICollection<Residencia> Residencias { get; set; } = new List<Residencia>();
+        public ICollection<Visita> Visitas { get; set; } = new List<Visita>();
+
+        // 👇 navegación correcta hacia Correspondencia
+        public ICollection<Correspondencia> Correspondencias { get; set; } = new List<Correspondencia>();
     }
 }

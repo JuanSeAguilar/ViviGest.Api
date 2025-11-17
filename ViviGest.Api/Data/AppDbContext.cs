@@ -88,32 +88,56 @@ public class AppDbContext : DbContext
              .HasForeignKey(x => x.IdRol);
         });
 
-        // NUEVAS configuraciones para correspondencia
+        // Unidad
+        mb.Entity<Unidad>(e =>
+        {
+            e.ToTable("Unidad");
+            e.HasKey(x => x.IdUnidad);
+            e.Property(x => x.Codigo).HasMaxLength(20);
+            e.Property(x => x.AreaM2).HasColumnType("decimal(8,2)");
+
+            e.HasOne(x => x.Torre)
+             .WithMany(t => t.Unidades)
+             .HasForeignKey(x => x.IdTorre)
+             .OnDelete(DeleteBehavior.Restrict);
+
+            // 👇 relación 1 (Unidad) - N (Correspondencia) usando IdUnidad
+            e.HasMany(u => u.Correspondencias)
+             .WithOne(c => c.Unidad)
+             .HasForeignKey(c => c.IdUnidad)
+             .HasPrincipalKey(u => u.IdUnidad);
+        });
+
         // Correspondencia
         mb.Entity<Correspondencia>(e =>
         {
             e.ToTable("Correspondencia");
-            e.HasKey(x => x.IdCorrespondencia);
-            e.Property(x => x.Remitente).HasMaxLength(120);
-            e.Property(x => x.Observacion).HasMaxLength(250);
-            e.Property(x => x.EntregadoA).HasMaxLength(120);
+            e.HasKey(c => c.IdCorrespondencia);
 
-            e.HasOne(x => x.Unidad)
-             .WithMany()
-             .HasForeignKey(x => x.IdUnidad);
+            // Aseguramos el nombre de la columna
+            e.Property(c => c.IdUnidad).HasColumnName("IdUnidad");
 
-            e.HasOne(x => x.TipoCorrespondencia)
-             .WithMany()
-             .HasForeignKey(x => x.IdTipoCorrespondencia);
+            e.HasOne(c => c.Unidad)
+             .WithMany(u => u.Correspondencias)
+             .HasForeignKey(c => c.IdUnidad)
+             .HasPrincipalKey(u => u.IdUnidad)
+             .OnDelete(DeleteBehavior.Restrict);
 
-            e.HasOne(x => x.EstadoCorrespondencia)
+            e.HasOne(c => c.TipoCorrespondencia)
              .WithMany()
-             .HasForeignKey(x => x.IdEstadoCorrespondencia);
+             .HasForeignKey(c => c.IdTipoCorrespondencia);
 
-            e.HasOne(x => x.UsuarioRegistro)
+            e.HasOne(c => c.EstadoCorrespondencia)
              .WithMany()
-             .HasForeignKey(x => x.IdUsuarioRegistro);
+             .HasForeignKey(c => c.IdEstadoCorrespondencia);
+
+            e.HasOne(c => c.UsuarioRegistro)
+             .WithMany()
+             .HasForeignKey(c => c.IdUsuarioRegistro);
+
+            e.HasIndex(c => new { c.IdUnidad, c.FechaRecepcion });
         });
+
 
         // TipoCorrespondencia (catálogo)
         mb.Entity<TipoCorrespondencia>(e =>
@@ -131,19 +155,7 @@ public class AppDbContext : DbContext
             e.Property(x => x.Nombre).HasMaxLength(30);
         });
 
-        // Unidad
-        mb.Entity<Unidad>(e =>
-        {
-            e.ToTable("Unidad");
-            e.HasKey(x => x.IdUnidad);
-            e.Property(x => x.Codigo).HasMaxLength(20);
-            e.Property(x => x.AreaM2).HasColumnType("decimal(8,2)");
-
-            e.HasOne(x => x.Torre)
-             .WithMany(t => t.Unidades)
-             .HasForeignKey(x => x.IdTorre)
-             .OnDelete(DeleteBehavior.Restrict);
-        });
+       
 
         // Conjunto
         mb.Entity<Conjunto>(e =>

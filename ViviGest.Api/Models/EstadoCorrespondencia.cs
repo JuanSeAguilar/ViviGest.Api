@@ -10,7 +10,6 @@ namespace ViviGest.Api.Models
         [Key]
         public int IdEstadoCorrespondencia { get; set; }
 
-        [Required, MaxLength(50)]
-        public string Nombre { get; set; } = string.Empty; 
+        public string Nombre { get; set; } = null!;
     }
 }
