@@ -2,106 +2,120 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using ViviGest.Api.Dtos;
 using ViviGest.Api.Models;
 using ViviGest.Data;
+ // Asegúrate de importar tu DbContext
 
-namespace ViviGest.Api.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class PagoController : ControllerBase
+namespace ViviGestBackend.Controllers
 {
-    private readonly AppDbContext _db;
-
-    public PagoController(AppDbContext db) => _db = db;
-
-    private Guid UsuarioId => Guid.Parse(User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "uid").Value);
-
-    // GET: /api/pago/cargos-pendientes (Residente: ver cargos pendientes de sus unidades)
-    [Authorize(Roles = "Residente")]
-    [HttpGet("cargos-pendientes")]
-    public async Task<IActionResult> GetCargosPendientes()
+    [ApiController]
+    [Route("api/[controller]")]
+    public class PagoController : ControllerBase
     {
-        var unidadesIds = await _db.Residencias
-            .Where(r => r.IdUsuario == UsuarioId && r.FechaFin == null)
-            .Select(r => r.IdUnidad)
-            .ToListAsync();
+        private readonly AppDbContext _db;
 
-        var cargos = await _db.CargoCuentas
-            .Include(c => c.Unidad).ThenInclude(u => u.Torre)
-            .Include(c => c.PeriodoPago)
-            .Where(c => unidadesIds.Contains(c.IdUnidad))
-            .Select(c => new
-            {
-                idCargoCuenta = c.IdCargoCuenta,
-                unidad = $"{c.Unidad.Torre.Nombre} - {c.Unidad.Codigo}",
-                periodo = c.PeriodoPago.Periodo,
-                concepto = c.Concepto,
-                valor = c.Valor
-            })
-            .ToListAsync();
-
-        return Ok(cargos);
-    }
-
-    // POST: /api/pago (Residente: registrar un pago)
-    [Authorize(Roles = "Residente")]
-    [HttpPost]
-    public async Task<IActionResult> RegistrarPago([FromBody] RegistrarPagoDto dto)
-    {
-        // Validar que el cargo existe y pertenece al residente
-        var cargo = await _db.CargoCuentas
-            .Include(c => c.Unidad).ThenInclude(u => u.Residencias)
-            .FirstOrDefaultAsync(c => c.IdCargoCuenta == dto.IdCargoCuenta);
-
-        if (cargo == null) return NotFound("Cargo no encontrado");
-
-        var esDeResidente = cargo.Unidad.Residencias.Any(r => r.IdUsuario == UsuarioId && r.FechaFin == null);
-        if (!esDeResidente) return Forbid("No tienes permiso para pagar este cargo");
-
-        // Registrar pago
-        var metodoTarjeta = await _db.MetodoPagos.FirstAsync(m => m.Nombre == "Tarjeta");
-        var pago = new Pago
+        public PagoController(AppDbContext db)
         {
-            IdPago = Guid.NewGuid(),
-            IdUnidad = cargo.IdUnidad,
-            IdPeriodoPago = cargo.IdPeriodoPago,
-            Valor = dto.Valor,
-            IdMetodoPago = metodoTarjeta.IdMetodoPago,
-            FechaPago = DateTime.UtcNow,
-            IdUsuarioRegistro = UsuarioId
-        };
+            _db = db;
+        }
 
-        _db.Pagos.Add(pago);
-        await _db.SaveChangesAsync();
+        // Obtener cargos pendientes (solo los no pagados)
+        [Authorize]
+        [HttpGet("cargos-pendientes")]
+        public async Task<IActionResult> GetCargosPendientes()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
-        return Ok(new { message = "Pago registrado exitosamente", idPago = pago.IdPago });
+            // Obtener unidades del residente (usando Residencia)
+            var unidades = await _db.Residencias
+                .Where(r => r.IdUsuario == Guid.Parse(userId) && (r.FechaFin == null || r.FechaFin > DateTime.Today))
+                .Select(r => r.IdUnidad)
+                .ToListAsync();
+
+            // Obtener cargos pendientes (solo aquellos sin pago registrado)
+            var cargosPendientes = await _db.CargoCuentas
+                .Where(c => unidades.Contains(c.IdUnidad) &&
+                            !_db.Pago.Any(p => p.IdCargoCuenta == c.IdCargoCuenta)) // Filtra si no hay pago ligado
+                .Include(c => c.Unidad)
+                .Include(c => c.PeriodoPago)
+                .Select(c => new {
+                    idCargoCuenta = c.IdCargoCuenta,
+                    unidad = c.Unidad.Codigo, // Ajusta si tienes CodigoCompleto
+                    periodo = c.PeriodoPago.Periodo,
+                    concepto = c.Concepto,
+                    valor = c.Valor
+                })
+                .ToListAsync();
+
+            return Ok(cargosPendientes);
+        }
+
+        // Registrar un pago
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> RegistrarPago([FromBody] RegistrarPagoDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Verificar que el cargo existe y pertenece al usuario
+            var cargo = await _db.CargoCuentas
+                .Include(c => c.Unidad)
+                .FirstOrDefaultAsync(c => c.IdCargoCuenta == dto.IdCargoCuenta);
+
+            if (cargo == null) return NotFound("Cargo no encontrado");
+
+            // Verificar que el usuario es residente de la unidad (usando Residencia)
+            var esResidente = await _db.Residencias
+                .AnyAsync(r => r.IdUnidad == cargo.IdUnidad && r.IdUsuario == Guid.Parse(userId) &&
+                               (r.FechaFin == null || r.FechaFin > DateTime.Today));
+
+            if (!esResidente) return Forbid("No tienes permiso para pagar este cargo");
+
+            // Crear el pago (ligado al cargo)
+            var pago = new Pago
+            {
+                IdPago = Guid.NewGuid(),
+                IdUnidad = cargo.IdUnidad,
+                IdPeriodoPago = cargo.IdPeriodoPago,
+                Valor = dto.Valor,
+                IdMetodoPago = 3, // Asume Tarjeta (ajusta si tienes un valor dinámico)
+                FechaPago = DateTime.UtcNow,
+                IdUsuarioRegistro = Guid.Parse(userId),
+                FechaRegistro = DateTime.UtcNow,
+                IdCargoCuenta = dto.IdCargoCuenta // ← NUEVO: Liga al cargo
+            };
+
+            _db.Pago.Add(pago);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Pago registrado", idPago = pago.IdPago });
+        }
+
+        // Obtener todos los pagos (para admin)
+        [Authorize(Roles = "Administrador")]
+        [HttpGet]
+        public async Task<IActionResult> GetPagos()
+        {
+            var pagos = await _db.Pago
+                .Include(p => p.IdCargoCuenta) // Incluye el cargo si existe
+                .Select(p => new {
+                    idPago = p.IdPago,
+                    idCargoCuenta = p.IdCargoCuenta,
+                    valor = p.Valor,
+                    fechaPago = p.FechaPago,
+                    // Agrega más campos si los necesitas
+                })
+                .ToListAsync();
+
+            return Ok(pagos);
+        }
     }
 
-    // GET: /api/pago (Admin: ver todos los pagos)
-    [Authorize(Roles = "Administrador")]
-    [HttpGet]
-    public async Task<IActionResult> GetPagos()
+    public class RegistrarPagoDto
     {
-        var pagos = await _db.Pagos
-            .Include(p => p.Unidad).ThenInclude(u => u.Torre)
-            .Include(p => p.PeriodoPago)
-            .Include(p => p.MetodoPago)
-            .Include(p => p.UsuarioRegistro).ThenInclude(u => u.Persona)
-            .OrderByDescending(p => p.FechaPago)
-            .Select(p => new
-            {
-                idPago = p.IdPago,
-                residente = p.UsuarioRegistro.Persona.Nombres + " " + p.UsuarioRegistro.Persona.Apellidos,
-                unidad = $"{p.Unidad.Torre.Nombre} - {p.Unidad.Codigo}",
-                periodo = p.PeriodoPago.Periodo,
-                valor = p.Valor,
-                metodo = p.MetodoPago.Nombre,
-                fechaPago = p.FechaPago
-            })
-            .ToListAsync();
-
-        return Ok(pagos);
+        public Guid IdCargoCuenta { get; set; }
+        public decimal Valor { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ViviGest.Api.Models;
+using ViviGestBackend.Models;
 
 namespace ViviGest.Data;
 
@@ -22,6 +23,12 @@ public class AppDbContext : DbContext
     public DbSet<Conjunto> Conjuntos => Set<Conjunto>();
     public DbSet<Residencia> Residencias => Set<Residencia>();
 
+    public DbSet<CargoCuenta> CargoCuenta { get; set; }
+    public DbSet<Pago> Pago { get; set; }
+    public DbSet<Unidad> Unidad { get; set; }
+    public DbSet<PeriodoPago> PeriodoPago { get; set; }
+    public DbSet<Residencia> Residencia { get; set; }
+
     // Operación de portería
     public DbSet<Visitante> Visitantes => Set<Visitante>();
     public DbSet<Visita> Visitas => Set<Visita>();
@@ -30,7 +37,7 @@ public class AppDbContext : DbContext
     public DbSet<PeriodoPago> PeriodoPagos { get; set; }
     public DbSet<CargoCuenta> CargoCuentas { get; set; }
     public DbSet<MetodoPago> MetodoPagos { get; set; }
-    public DbSet<Pago> Pagos { get; set; }
+   
 
 
     // Catálogos (déjalos solo si SON tablas en tu modelo, no enums)
