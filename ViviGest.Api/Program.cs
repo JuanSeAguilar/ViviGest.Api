@@ -74,6 +74,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
+app.Urls.Add("http://localhost:7049");
 app.UseCors("FrontPolicy");
 app.UseAuthentication();
 app.UseAuthorization();

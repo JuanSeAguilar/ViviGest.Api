@@ -40,9 +40,11 @@ public class ResidenteCorrespondenciaController : ControllerBase
             return Ok(Array.Empty<object>());
 
         var query = _db.Correspondencias
-            .Include(c => c.TipoCorrespondencia)
-            .Include(c => c.EstadoCorrespondencia)
-            .Where(c => unidadesIds.Contains(c.IdUnidad));
+    .Include(c => c.TipoCorrespondencia)
+    .Include(c => c.EstadoCorrespondencia)
+    .Include(c => c.UsuarioRegistro)  // ← Este Include es clave
+        .ThenInclude(u => u.Persona)  // ← Y este
+    .Where(c => unidadesIds.Contains(c.IdUnidad));
 
         if (soloPendiente)
         {
@@ -62,7 +64,9 @@ public class ResidenteCorrespondenciaController : ControllerBase
                 tipoCorrespondencia = c.TipoCorrespondencia.Nombre,
                 fechaRecepcion = c.FechaRecepcion,
                 estado = c.EstadoCorrespondencia.Nombre,
-                observacion = c.Observacion
+                observacion = c.Observacion,
+                remitente = c.Remitente,
+                registradoPor = c.UsuarioRegistro.Persona.Nombres + " " + c.UsuarioRegistro.Persona.Apellidos  // ← Este campo
             })
             .ToListAsync();
 

@@ -27,6 +27,10 @@ public class AppDbContext : DbContext
     public DbSet<Visita> Visitas => Set<Visita>();
     public DbSet<PersonaAutorizada> PersonasAutorizadas => Set<PersonaAutorizada>();
     public DbSet<TipoRelacionAutorizado> TiposRelacionAutorizado => Set<TipoRelacionAutorizado>();
+    public DbSet<PeriodoPago> PeriodoPagos { get; set; }
+    public DbSet<CargoCuenta> CargoCuentas { get; set; }
+    public DbSet<MetodoPago> MetodoPagos { get; set; }
+    public DbSet<Pago> Pagos { get; set; }
 
 
     // Catálogos (déjalos solo si SON tablas en tu modelo, no enums)
