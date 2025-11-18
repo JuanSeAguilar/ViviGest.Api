@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using ViviGest.Api.Models;
 using ViviGest.Data;
- // Asegúrate de importar tu DbContext
 
 namespace ViviGestBackend.Controllers
 {
@@ -36,12 +35,12 @@ namespace ViviGestBackend.Controllers
             // Obtener cargos pendientes (solo aquellos sin pago registrado)
             var cargosPendientes = await _db.CargoCuentas
                 .Where(c => unidades.Contains(c.IdUnidad) &&
-                            !_db.Pago.Any(p => p.IdCargoCuenta == c.IdCargoCuenta)) // Filtra si no hay pago ligado
+                            !_db.Pago.Any(p => p.IdCargoCuenta == c.IdCargoCuenta))
                 .Include(c => c.Unidad)
                 .Include(c => c.PeriodoPago)
                 .Select(c => new {
                     idCargoCuenta = c.IdCargoCuenta,
-                    unidad = c.Unidad.Codigo, // Ajusta si tienes CodigoCompleto
+                    unidad = c.Unidad.Codigo,
                     periodo = c.PeriodoPago.Periodo,
                     concepto = c.Concepto,
                     valor = c.Valor
@@ -80,11 +79,11 @@ namespace ViviGestBackend.Controllers
                 IdUnidad = cargo.IdUnidad,
                 IdPeriodoPago = cargo.IdPeriodoPago,
                 Valor = dto.Valor,
-                IdMetodoPago = 3, // Asume Tarjeta (ajusta si tienes un valor dinámico)
+                IdMetodoPago = 3,
                 FechaPago = DateTime.UtcNow,
                 IdUsuarioRegistro = Guid.Parse(userId),
                 FechaRegistro = DateTime.UtcNow,
-                IdCargoCuenta = dto.IdCargoCuenta // ← NUEVO: Liga al cargo
+                IdCargoCuenta = dto.IdCargoCuenta
             };
 
             _db.Pago.Add(pago);
@@ -99,21 +98,34 @@ namespace ViviGestBackend.Controllers
         public async Task<IActionResult> GetPagos()
         {
             var pagos = await _db.Pago
-                .Include(p => p.IdCargoCuenta) // Incluye el cargo si existe
-                .Select(p => new {
+                .Include(p => p.Unidad)
+                    .ThenInclude(u => u.Residencias)
+                        .ThenInclude(r => r.Usuario)
+                            .ThenInclude(u => u.Persona)
+                .Include(p => p.PeriodoPago)
+                .Include(p => p.MetodoPago)
+                .AsNoTracking()
+                .Select(p => new
+                {
                     idPago = p.IdPago,
                     idCargoCuenta = p.IdCargoCuenta,
+                    residente = p.Unidad.Residencias
+                        .Where(r => r.FechaFin == null)
+                        .Select(r => r.Usuario.Persona.Nombres + " " + r.Usuario.Persona.Apellidos)
+                        .FirstOrDefault() ?? "Sin residente",
+                    unidad = p.Unidad.Codigo,
+                    periodo = p.PeriodoPago.Periodo,
+                    metodoPago = p.MetodoPago.Nombre,
                     valor = p.Valor,
                     fechaPago = p.FechaPago,
-                    // Agrega más campos si los necesitas
+                    fechaRegistro = p.FechaRegistro
                 })
-                .ToListAsync();
+                .ToListAsync(); // ✅ Aquí va el await y ToListAsync()
 
             return Ok(pagos);
         }
     }
-
-    public class RegistrarPagoDto
+        public class RegistrarPagoDto
     {
         public Guid IdCargoCuenta { get; set; }
         public decimal Valor { get; set; }

@@ -11,7 +11,7 @@ namespace ViviGest.Api.Controllers
     public class CatalogoController : ControllerBase
     {
         private readonly AppDbContext _db;
-        public CatalogoController(AppDbContext db) => _db = db; 
+        public CatalogoController(AppDbContext db) => _db = db;
 
         [HttpGet("torres")]
         public async Task<IActionResult> GetTorres()
@@ -32,6 +32,37 @@ namespace ViviGest.Api.Controllers
                 .Where(u => u.IdTorre == torreId)
                 .OrderBy(u => u.Codigo)
                 .Select(u => new { u.IdUnidad, u.Codigo })
+                .ToListAsync();
+
+            return Ok(data);
+        }
+
+        [HttpGet("unidades-detalles")]
+        public async Task<IActionResult> GetUnidadesDetalles([FromQuery] Guid torreId)
+        {
+            if (torreId == Guid.Empty)
+                return BadRequest(new { message = "torreId es requerido." });
+
+            var data = await _db.Unidades
+                .Where(u => u.IdTorre == torreId )
+                .OrderBy(u => u.Codigo)
+                .Select(u => new
+                {
+                    u.IdUnidad,
+                    u.Codigo,
+                    u.AreaM2,
+                    Residente = _db.Residencias
+                        .Where(r => r.IdUnidad == u.IdUnidad && r.FechaFin == null)
+                        .Select(r => new
+                        {
+                            r.IdUsuario,
+                            Nombre = r.Usuario.Persona.Nombres + " " + r.Usuario.Persona.Apellidos,
+                            Email = r.Usuario.Persona.CorreoElectronico,
+                            Telefono = r.Usuario.Persona.Telefono,
+                            r.FechaInicio
+                        })
+                        .FirstOrDefault()
+                })
                 .ToListAsync();
 
             return Ok(data);

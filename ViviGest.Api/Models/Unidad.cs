@@ -14,6 +14,7 @@ namespace ViviGest.Api.Models
         public Guid IdTorre { get; set; }
         public string Codigo { get; set; } = null!;
         public decimal AreaM2 { get; set; }
+        public int? Piso { get; set; }
 
         [ForeignKey(nameof(IdTorre))]
         public Torre Torre { get; set; } = null!;

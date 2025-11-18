@@ -46,6 +46,6 @@ namespace ViviGest.Api.Models
         public virtual Usuario UsuarioRegistro { get; set; } = null!;
 
         [ForeignKey("IdCargoCuenta")]
-        public virtual CargoCuenta? CargoCuenta { get; set; }
+        public virtual CargoCuenta CargoCuenta { get; set; } = null!;
     }
 }
